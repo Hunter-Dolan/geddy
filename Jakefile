@@ -7,20 +7,22 @@ var fs = require('fs')
   , exec = child_process.exec
   , inflection = require('./deps/inflection')
   , utils = require('./lib/utils')
-  , ejs = require('./lib/template/adapters/ejs/template')
+  , Templato = require('./deps/templato')
+  , ejs = require('./lib/template/adapters/ejs')
   , createPackageTask;
 
 var JSPAT = /\.js$/;
 
 namespace('gen', function () {
   var _writeTemplate = function (name, filename, dirname, opts) {
-        var names = _getInflections(name)
+        var templato = new Templato
+          , names = _getInflections(name)
           , text = fs.readFileSync(path.join(__dirname,
                 'templates', filename +'.ejs'), 'utf8').toString()
           , templ
           , filePath;
         // Render with the right model name
-        templ = new ejs.Template({text: text});
+        templ = new ejs.Template({text: text, templato: templato});
         templ.process({data: {names: names}});
         filePath = path.join('app', dirname,
             names.filename[opts.inflection] + '.js');
